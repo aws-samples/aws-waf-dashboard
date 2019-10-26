@@ -1,0 +1,3 @@
+cd domain-setter-lambda; zip -r ../domain-setter-lambda.zip *; cd ..
+cd es-cognito-auth-lambda; zip -r ../es-cognito-auth-lambda.zip *; cd ..
+cd kibana-customizer-lambda; zip -r ../kibana-customizer-lambda.zip *; cd ..

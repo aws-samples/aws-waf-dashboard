@@ -1,8 +1,3 @@
-#Zip all Lambda functions
-#cd domain-setter-lambda; zip -r ../domain-setter-lambda.zip *; cd ..
-#cd es-cognito-auth-lambda; zip -r ../es-cognito-auth-lambda.zip *; cd ..
-#cd kibana-customizer-lambda; zip -r ../kibana-customizer-lambda.zip *; cd ..
-
 import boto3
 
 bucket_prefix = "aws-waf-dashboard-"
@@ -13,13 +8,6 @@ for region in regions:
     print("Working on region: " + region);
     bucket_name = bucket_prefix + region
     
-    #s3 = boto3.client('s3', region_name=region)
-    #if (region != 'us-east-1'):
-    #    s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': region})
-    #else:
-    #    s3.create_bucket(Bucket=bucket_name)
-    
-
     file1 = 'domain-setter-lambda.zip'
     file2 = 'es-cognito-auth-lambda.zip'
     file3 = 'kibana-customizer-lambda.zip'
@@ -33,12 +21,3 @@ for region in regions:
     s3.put_object_acl(ACL='public-read', Bucket=bucket_name, Key=file1)
     s3.put_object_acl(ACL='public-read', Bucket=bucket_name, Key=file2)
     s3.put_object_acl(ACL='public-read', Bucket=bucket_name, Key=file3)
-
-
-#Delete all local resources which are not needed anymore
-#rm domain-setter-lambda.zip
-#rm es-cognito-auth-lambda.zip
-#rm kibana-customizer-lambda.zip#Zip all Lambda functions
-#cd domain-setter-lambda; zip -r ../domain-setter-lambda.zip *; cd ..
-#cd es-cognito-auth-lambda; zip -r ../es-cognito-auth-lambda.zip *; cd ..
-#cd kibana-customizer-lambda; zip -r ../kibana-customizer-lambda.zip *; cd ..
