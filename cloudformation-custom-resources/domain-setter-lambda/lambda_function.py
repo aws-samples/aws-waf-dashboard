@@ -23,6 +23,7 @@ def create(event, context):
     stackName = event['ResourceProperties']['StackName'];
     userPoolId =  event['ResourceProperties']['UserPoolId']; 
     domain = stackName.lower() + '-' + userPoolId.replace("_","-").lower();
+    domain = domain.replace("aws","app");
     
     logger.info("Setting UserPool domain (" + domain + ")")
      
