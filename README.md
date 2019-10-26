@@ -1,3 +1,5 @@
+# AWS WAF Dashboard
+
 ## Description
 
 AWS WAF Dashboards are ready to use dashboards (build on Amazon Elasticsearch Service with Kibana) which can be quickly connected to already existing AWS WAF configuration and allow visualization of AWS WAF Logs with multiple build in visualization diagrams.
