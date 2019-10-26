@@ -14,7 +14,7 @@ Parameters:
 
   ElasticSerchDomainName:
     Type: String
-    Default: 'waf-dashboards'
+    Default: 'waf-dashboard'
     AllowedPattern: "[a-z\\-]*"
     Description: Elasticsearch domain name
 
@@ -33,7 +33,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'waf-dashboards-'
+          - - 'aws-waf-dashboard-'
             - !Ref "AWS::Region"
         S3Key: "domain-setter-lambda.zip"
       Runtime: "python3.7"
@@ -48,7 +48,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'waf-dashboards-'
+          - - 'aws-waf-dashboard-'
             - !Ref "AWS::Region"
         S3Key: "es-cognito-auth-lambda.zip"
       Runtime: "python3.7"
@@ -63,7 +63,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'waf-dashboards-'
+          - - 'aws-waf-dashboard-'
             - !Ref "AWS::Region"
         S3Key: "kibana-customizer-lambda.zip"
       Runtime: "python3.7"
@@ -440,7 +440,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'waf-dashboards-'
+          - - 'aws-waf-dashboard-'
             - !Ref "AWS::Region"
         S3Key: "kibana-customizer-lambda.zip"
       Runtime: "python3.7"
