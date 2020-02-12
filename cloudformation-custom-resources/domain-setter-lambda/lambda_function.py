@@ -23,8 +23,7 @@ def create(event, context):
     stackName = event['ResourceProperties']['StackName'];
     userPoolId =  event['ResourceProperties']['UserPoolId']; 
     domain = stackName.lower() + '-' + userPoolId.replace("_","-").lower();
-    domain = domain.replace("aws","app");
-    
+    domain = domain.replace("aws", "company");
     logger.info("Setting UserPool domain (" + domain + ")")
      
     client.create_user_pool_domain(
@@ -47,7 +46,10 @@ def delete(event, context):
     stackName = event['ResourceProperties']['StackName'];
     userPoolId =  event['ResourceProperties']['UserPoolId']; 
     domain = stackName.lower() + '-' + userPoolId.replace("_","-").lower();
+    domain = domain.replace("aws", "company");
     stackName = event['ResourceProperties']['StackName'];
+    
+    
     
     client.delete_user_pool_domain(
         Domain = domain,

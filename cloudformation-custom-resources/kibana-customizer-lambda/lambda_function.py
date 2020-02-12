@@ -12,6 +12,9 @@ helper = CfnResource(json_logging=False, log_level='DEBUG', boto_level='CRITICAL
 
 waf = boto3.client('waf');
 wafRegional = boto3.client('waf-regional')
+wafv2_cloudfront = boto3.client('wafv2', region_name='us-east-1')
+wafv2_regional = boto3.client('wafv2')
+accountId = "TO_REPLACE"
 
 try:
     ## Init code goes here
@@ -26,6 +29,7 @@ def create(event, context):
 
     region = event['ResourceProperties']['Region'];
     host = event['ResourceProperties']['Host'];
+    accountId = event['ResourceProperties']['AccountID']; 
     service = 'es'
     credentials = boto3.Session().get_credentials()
     awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
@@ -39,7 +43,8 @@ def create(event, context):
 
 @helper.update
 def update(event, context):
-    logger.info("Got Update")
+    logger.info("Got Update. Creating enyway.")
+    create(event, context);
 
 @helper.delete
 def delete(event, context):
@@ -127,7 +132,7 @@ def update_all(host, awsauth):
     import_kibana_object(host, awsauth, "visualization", "allvsblockedrequests")
     import_kibana_object(host, awsauth, "visualization", "top10countries")
     import_kibana_object(host, awsauth, "visualization", "top10useragents")
-
+    import_kibana_object(host, awsauth, "visualization", "top10uris")
     import_kibana_object(host, awsauth, "visualization", "top10rules")
     import_kibana_object(host, awsauth, "visualization", "top10ip")
     import_kibana_object(host, awsauth, "visualization", "top10hosts")
@@ -154,7 +159,21 @@ def generate_wafacls_mapping():
         mapping = "if (webacl == \\\\\\\"" + webacl["WebACLId"] + "\\\\\\\") { return \\\\\\\"" + webacl["Name"] + "\\\\\\\";}\\\\n"
         mappings = mappings + mapping;
 
+    webacls = wafv2_cloudfront.list_web_acls(Scope='CLOUDFRONT')['WebACLs']
+    for webacl in webacls:
+        logWebACLId = "arn:aws:wafv2:us-east-1:" + os.environ['ACCOUNT_ID'] + ":global/webacl/" + webacl["Name"] + "/" + webacl["Id"];
+        mapping = "if (webacl == \\\\\\\"" + logWebACLId + "\\\\\\\") { return \\\\\\\"" + webacl["Name"] + "\\\\\\\";}\\\\n"
+        mappings = mappings + mapping;
+        
+    webacls = wafv2_regional.list_web_acls(Scope='REGIONAL')['WebACLs']
+    for webacl in webacls:
+        logWebACLId = "arn:aws:wafv2:us-east-1:" + os.environ['ACCOUNT_ID'] + ":regional/webacl/" + webacl["Name"] + "/" + webacl["Id"];
+        mapping = "if (webacl == \\\\\\\"" + logWebACLId + "\\\\\\\") { return \\\\\\\"" + webacl["Name"] + "\\\\\\\";}\\\\n"
+        mappings = mappings + mapping;
+
     return mappings;
+    
+    
 
 def update_kibana(event, context):
     

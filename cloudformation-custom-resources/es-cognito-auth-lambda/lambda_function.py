@@ -46,15 +46,22 @@ def create(event, context):
     
     time.sleep(10)
     
+    limit = 0;
+    
     processing = True;
     while (processing):
+        limit = limit + 1;
+        
         processing = es.describe_elasticsearch_domain(
             DomainName = domainName
         )['DomainStatus']['Processing']
         
-        logger.info("Waiting... ES is still processing")
+        logger.info("Waiting... ES is still processing (" + str(limit) + ")");
         
         time.sleep(30)
+        
+        if (limit > 20):
+            processing = False;
     
     logger.info("Done!")
     
