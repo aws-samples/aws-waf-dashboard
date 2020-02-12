@@ -14,7 +14,7 @@ Parameters:
 
   ElasticSerchDomainName:
     Type: String
-    Default: 'waf-dashboard'
+    Default: 'waf-dashboards'
     AllowedPattern: "[a-z\\-]*"
     Description: Elasticsearch domain name
 
@@ -33,7 +33,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'aws-waf-dashboard-'
+          - - 'waf-dashboards-'
             - !Ref "AWS::Region"
         S3Key: "domain-setter-lambda.zip"
       Runtime: "python3.7"
@@ -48,7 +48,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'aws-waf-dashboard-'
+          - - 'waf-dashboards-'
             - !Ref "AWS::Region"
         S3Key: "es-cognito-auth-lambda.zip"
       Runtime: "python3.7"
@@ -63,13 +63,16 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'aws-waf-dashboard-'
+          - - 'waf-dashboards-'
             - !Ref "AWS::Region"
         S3Key: "kibana-customizer-lambda.zip"
       Runtime: "python3.7"
       MemorySize: 128
       Timeout: 160
-
+      Environment:
+        Variables:
+          REGION : !Ref "AWS::Region"
+          ACCOUNT_ID : !Ref "AWS::AccountId"
 
   UserPoolDomainSetterLambdaRole:
     Type: "AWS::IAM::Role"
@@ -164,6 +167,7 @@ Resources:
                   - 'waf-regional:ListWebACLs'
                   - 'waf:ListRules'
                   - 'waf-regional:ListRules'
+                  - 'wafv2:ListWebACLs'
                 Resource: "*"
 
   KinesisFirehoseS3Bucket:
@@ -431,6 +435,7 @@ Resources:
       StackName: !Ref "AWS::StackName"
       Region: !Ref "AWS::Region"
       Host: !GetAtt ElasticsearchDomain.DomainEndpoint
+      AccountID: !Ref "AWS::AccountId"
 
   KibanaUpdate:
     Type: "AWS::Lambda::Function"
@@ -440,7 +445,7 @@ Resources:
       Code:
         S3Bucket: !Join
           - ''
-          - - 'aws-waf-dashboard-'
+          - - 'waf-dashboards-'
             - !Ref "AWS::Region"
         S3Key: "kibana-customizer-lambda.zip"
       Runtime: "python3.7"
@@ -450,6 +455,31 @@ Resources:
         Variables:
           ES_ENDPOINT : !GetAtt ElasticsearchDomain.DomainEndpoint
           REGION : !Ref "AWS::Region"
+          ACCOUNT_ID : !Ref "AWS::AccountId"
+
+
+  WAFv2Modification:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: WAF Dashboard - detects new WebACL and rules for WAFv2.
+      EventPattern:
+        source:
+          - "aws.wafv2"
+        detail-type:
+          - "AWS API Call via CloudTrail"
+        detail:
+          eventSource:
+            - wafv2.amazonaws.com
+          eventName:
+            - CreateWebACL
+            - CreateRule
+      Name: WAFv2Modification
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !GetAtt KibanaUpdate.Arn
+          Id: "1"
+
 
   WAFGlobalModification:
     Type: AWS::Events::Rule
@@ -502,6 +532,14 @@ Resources:
       FunctionName: !Ref KibanaUpdate
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt WAFGlobalModification.Arn
+
+  KibanaUpdateWAFv2Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref KibanaUpdate
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt WAFv2Modification.Arn
 
   KibanaUpdateWAFRegionalPermission:
     Type: AWS::Lambda::Permission

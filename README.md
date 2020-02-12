@@ -18,7 +18,7 @@ In the wizard, you will be asked to modify/provide 4 different parameters. Those
 - **UserEmail**: You NEED to update this parameter. This should be email address of person (you?) who will get email with password, which will be require to login to Kibana dashboard.
 
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=waf-dashboards&templateURL=https://waf-dashboards.s3.amazonaws.com/waf-dashboard.yaml" ><img src="https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2017/02/10/launchstack.png" width="200"></a>
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=aws-waf-dashboard&templateURL=https://waf-dashboards.s3.amazonaws.com/dashboard.yaml" ><img src="https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2017/02/10/launchstack.png" width="200"></a>
 
 #### 2. Wait and take a break.
 
