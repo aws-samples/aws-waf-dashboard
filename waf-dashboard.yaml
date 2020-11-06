@@ -178,6 +178,8 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: 'WAFKibanaUsers'
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: True
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
