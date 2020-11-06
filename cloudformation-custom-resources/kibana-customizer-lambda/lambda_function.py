@@ -29,7 +29,7 @@ def create(event, context):
 
     region = event['ResourceProperties']['Region'];
     host = event['ResourceProperties']['Host'];
-    accountId = event['ResourceProperties']['AccountID']; 
+    accountId = event['ResourceProperties']['AccountID'];
     service = 'es'
     credentials = boto3.Session().get_credentials()
     awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
@@ -118,12 +118,12 @@ def generate_rules_mapping():
         mappings = mappings + mapping;
 
     return mappings;
-    
+
 
 def update_all(host, awsauth):
     delete_kibana_object(host, awsauth, "index-pattern", "awswaf")
     import_kibana_index_pattern(host, awsauth, "index-pattern", "awswaf")
-    
+
     import_kibana_object(host, awsauth, "visualization", "allcountries")
     import_kibana_object(host, awsauth, "visualization", "executedrules")
     import_kibana_object(host, awsauth, "visualization", "filters")
@@ -141,8 +141,8 @@ def update_all(host, awsauth):
     import_kibana_object(host, awsauth, "visualization", "uniqueipcount")
     import_kibana_object(host, awsauth, "visualization", "requestcount")
     import_kibana_object(host, awsauth, "visualization", "top10webacl")
-    
-    import_kibana_object(host, awsauth, "dashboard", "dashboard") 
+
+    import_kibana_object(host, awsauth, "dashboard", "dashboard")
 
 
 def generate_wafacls_mapping():
@@ -164,19 +164,19 @@ def generate_wafacls_mapping():
         logWebACLId = "arn:aws:wafv2:us-east-1:" + os.environ['ACCOUNT_ID'] + ":global/webacl/" + webacl["Name"] + "/" + webacl["Id"];
         mapping = "if (webacl == \\\\\\\"" + logWebACLId + "\\\\\\\") { return \\\\\\\"" + webacl["Name"] + "\\\\\\\";}\\\\n"
         mappings = mappings + mapping;
-        
+
     webacls = wafv2_regional.list_web_acls(Scope='REGIONAL')['WebACLs']
     for webacl in webacls:
-        logWebACLId = "arn:aws:wafv2:us-east-1:" + os.environ['ACCOUNT_ID'] + ":regional/webacl/" + webacl["Name"] + "/" + webacl["Id"];
+        logWebACLId = "arn:aws:wafv2:" + os.environ['REGION'] + ":" + os.environ['ACCOUNT_ID'] + ":regional/webacl/" + webacl["Name"] + "/" + webacl["Id"];
         mapping = "if (webacl == \\\\\\\"" + logWebACLId + "\\\\\\\") { return \\\\\\\"" + webacl["Name"] + "\\\\\\\";}\\\\n"
         mappings = mappings + mapping;
 
     return mappings;
-    
-    
+
+
 
 def update_kibana(event, context):
-    
+
     region = os.environ['REGION']
     host = os.environ['ES_ENDPOINT']
     service = 'es'
@@ -185,5 +185,5 @@ def update_kibana(event, context):
 
     delete_kibana_object(host, awsauth, "index-pattern", "awswaf")
     import_kibana_index_pattern(host, awsauth, "index-pattern", "awswaf")
-    
+
     #update_all(host, awsauth);
