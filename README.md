@@ -6,6 +6,15 @@ AWS WAF Dashboards are ready to use dashboards (build on Amazon Elasticsearch Se
 
 To start using  AWS WAF Dashboards you don't need to have any prior experience with Elasticsarch or even AWS WAF, minimal AWS knowledge is require. You just need to launch a cloud formation template - which will do all the rest. Whole process takes around 30 minutes (with 25 minutes of waiting).
 
+Important!
+Solution is working for following regions: Tokyo, Seoul, Mumbai, Singapore, Sidney, Ireland, London, Paris, São Paulo, N. Virginia, Ohio, N. California, Oregon. The reason is that it depends on some others services (like Cognito) - which are not available in all regions.
+
+## Description
+
+AWS WAF Dashboards are ready to use dashboards (build on Amazon Elasticsearch Service with Kibana) which can be quickly connected to already existing AWS WAF configuration and allow visualization of AWS WAF Logs with multiple build in visualization diagrams.
+
+To start using  AWS WAF Dashboards you don't need to have any prior experience with Elasticsarch or even AWS WAF, minimal AWS knowledge is require. You just need to launch a cloud formation template - which will do all the rest. Whole process takes around 30 minutes (with 25 minutes of waiting).
+
 ## Installation
 
 #### 1. Launch Cloud Formation template
