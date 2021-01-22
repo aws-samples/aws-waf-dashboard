@@ -9,7 +9,7 @@ Parameters:
 
   NodeType:
     Type: String
-    Default: m3.medium.elasticsearch
+    Default: m5.large.elasticsearch
     Description: Elasticsearch Node Type
 
   ElasticSerchDomainName:
