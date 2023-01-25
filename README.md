@@ -50,7 +50,9 @@ Type *y* and press enter when prompted if you wish to deploy the changes.
 There are three more optional AWS CDK deployment parameters that have default values. You can use these parameters in addition to the mandatory parameters (the email and Cognito domain). The additional parameters are the following:	
 
 •	**EBS size for the OpenSearch Service cluster:** *osdfwOsEbsSize*
+
 •	**Node type for the OpenSearch Service cluster:** *osdfwOsNodeSize*
+
 •	**OpenSearchDomainName:** *osdfwOsDomainName*
 
 #### Verify that the OpenSearch dashboard works
