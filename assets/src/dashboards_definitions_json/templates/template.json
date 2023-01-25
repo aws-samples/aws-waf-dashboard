@@ -1,0 +1,26 @@
+{
+    "index_patterns": [
+        "awswaf-*"
+    ],
+    "template": {
+        "settings": {
+            "number_of_shards": 1
+        },
+        "mappings": {
+            "properties": {
+                "clientIp": {
+                    "type": "keyword",
+                    "fields": {
+                        "keyword": {
+                            "type": "ip"
+                        }
+                    }
+                },
+                "timestamp": {
+                    "type": "date",
+                    "format": "epoch_millis"
+                }
+            }
+        }
+    }
+}
