@@ -1,3 +1,0 @@
-rm domain-setter-lambda.zip
-rm es-cognito-auth-lambda.zip
-rm kibana-customizer-lambda.zip
