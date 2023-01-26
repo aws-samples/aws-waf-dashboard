@@ -24,7 +24,7 @@ git clone https://github.com/aws-samples/aws-waf-dashboard.git
 2.	Navigate into the cloned project folder by running the following command.
 
 ```
-cd aws-waf-dashboards
+cd aws-waf-dashboard
 ```
 3.	Run the cdk commands to deploy the infrastructure.
  
