@@ -1,9 +1,5 @@
 package com.myorg;
 
-import software.amazon.awscdk.core.CustomResource;
-import software.amazon.awscdk.core.Duration;
-import software.amazon.awscdk.core.NestedStack;
-import software.amazon.awscdk.core.RemovalPolicy;
 import software.amazon.awscdk.services.events.EventPattern;
 import software.amazon.awscdk.services.events.Rule;
 import software.amazon.awscdk.services.events.targets.LambdaFunction;
@@ -11,12 +7,18 @@ import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.logs.RetentionDays;
-import software.amazon.awscdk.services.s3.Bucket;
 import software.constructs.Construct;
+import software.amazon.awscdk.NestedStack;
+
+import software.amazon.awscdk.CustomResource;
+import software.amazon.awscdk.RemovalPolicy;
+import software.amazon.awscdk.Duration;
+import software.amazon.awscdk.customresources.Provider;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 
 public class AppStack extends NestedStack {
     public Function dashboardsCustomizerLambda;
@@ -47,7 +49,7 @@ public class AppStack extends NestedStack {
                 ))
                 .build();
 
-        createCustomizer(dashboardsCustomizerLambda, props);
+        createCustomizer(dashboardsCustomizerLambda, customizerRole, props);
 
         Function customizerUpdaterLambda = Function.Builder.create(this, "osdfwDashboardsUpdater")
                 .architecture(Architecture.ARM_64)
@@ -80,6 +82,7 @@ public class AppStack extends NestedStack {
     }
 
     private List<Rule> createEvents(Function targetLambdaFn) {
+        
         Rule newACLForWafV2 = Rule.Builder.create(this, "osdfwCaptureNewAclsWafv2")
                 .description("AWS WAF Dashboards Solution - detects new WebACLs and rules for WAFv2.")
                 .eventPattern(EventPattern.builder()
@@ -165,9 +168,23 @@ public class AppStack extends NestedStack {
 
     }
 
-    public void createCustomizer(Function dashboardsCustomizerLambda, StreamStackProps props) {
+    public void createCustomizer(Function dashboardsCustomizerLambda, Role customRole,  StreamStackProps props) {
+
+        Function isComplete = Function.Builder.create(this, "isComplete")
+                .runtime(Runtime.NODEJS_14_X)
+                .handler("nodejs_function.isComplete")
+                .code(Code.fromAsset("assets_nodejs"))
+                .build();
+                
+        Provider customProvider = Provider.Builder.create(this, "CustomProvider")
+                .onEventHandler(dashboardsCustomizerLambda)
+                .isCompleteHandler(isComplete)
+                .logRetention(RetentionDays.ONE_MONTH)
+                .role(customRole)
+                .build();
+
         CustomResource.Builder.create(this, "osdfwCustomResourceLambda")
-                .serviceToken(dashboardsCustomizerLambda.getFunctionArn())
+                .serviceToken(customProvider.getServiceToken())
                 .removalPolicy(RemovalPolicy.DESTROY)
                 .properties(Map.of(
                         "StackName", this.getStackName(),
