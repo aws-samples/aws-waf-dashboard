@@ -1,6 +1,7 @@
 {
   "app": "mvn -e -q compile exec:java",
   "context": {
-    "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true
+    "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,
+    "@aws-cdk/customresources:installLatestAwsSdkDefault": false
   }
 }

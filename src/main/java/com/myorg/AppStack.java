@@ -13,7 +13,6 @@ import software.amazon.awscdk.NestedStack;
 import software.amazon.awscdk.CustomResource;
 import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Duration;
-import software.amazon.awscdk.customresources.Provider;
 
 import java.util.List;
 import java.util.Locale;
@@ -49,7 +48,7 @@ public class AppStack extends NestedStack {
                 ))
                 .build();
 
-        createCustomizer(dashboardsCustomizerLambda, customizerRole, props);
+        createCustomizer(dashboardsCustomizerLambda, props);
 
         Function customizerUpdaterLambda = Function.Builder.create(this, "osdfwDashboardsUpdater")
                 .architecture(Architecture.ARM_64)
@@ -168,23 +167,9 @@ public class AppStack extends NestedStack {
 
     }
 
-    public void createCustomizer(Function dashboardsCustomizerLambda, Role customRole,  StreamStackProps props) {
-
-        Function isComplete = Function.Builder.create(this, "isComplete")
-                .runtime(Runtime.NODEJS_14_X)
-                .handler("nodejs_function.isComplete")
-                .code(Code.fromAsset("assets_nodejs"))
-                .build();
-                
-        Provider customProvider = Provider.Builder.create(this, "CustomProvider")
-                .onEventHandler(dashboardsCustomizerLambda)
-                .isCompleteHandler(isComplete)
-                .logRetention(RetentionDays.ONE_MONTH)
-                .role(customRole)
-                .build();
-
+    public void createCustomizer(Function dashboardsCustomizerLambda, StreamStackProps props) {
         CustomResource.Builder.create(this, "osdfwCustomResourceLambda")
-                .serviceToken(customProvider.getServiceToken())
+                .serviceToken(dashboardsCustomizerLambda.getFunctionArn())
                 .removalPolicy(RemovalPolicy.DESTROY)
                 .properties(Map.of(
                         "StackName", this.getStackName(),
