@@ -20,6 +20,7 @@ public class StreamStack extends NestedStack {
     LogStream cwLogStreamOpenSearch;
     LogStream cwLogStreamS3;
     Role firehoseRole;
+    CfnDeliveryStream firehose;
 
     public StreamStack(final Construct scope, final String id, StreamStackProps streamStackProps) {
         super(scope, id, streamStackProps);
@@ -77,6 +78,7 @@ public class StreamStack extends NestedStack {
                 .deliveryStreamType("DirectPut")
                 .elasticsearchDestinationConfiguration(openSearchDestinationForFirehose)
                 .build();
+        this.firehose = wafLogsDeliveryStream;
 
 
         CfnOutput.Builder.create(this, "osdfwVarOsDomain")
@@ -88,6 +90,14 @@ public class StreamStack extends NestedStack {
                 .value(wafLogsDeliveryStream.getAttrArn())
                 .build();
 
+    }
+
+    public String getFirehoseArn() {
+        return this.firehose.getAttrArn();
+    }
+
+    public String getFirehoseStreamName() {
+        return this.firehose.getDeliveryStreamName();
     }
 
     public void createLoggingConfiguration() {
