@@ -116,7 +116,7 @@ public class MainStack extends Stack {
 
         this.openSearchDomain = Domain.Builder.create(this, "osdfwOpensearchDomain")
                 .domainName(openSearchDomainName.getValueAsString())
-                .version(EngineVersion.OPENSEARCH_1_0)
+                .version(EngineVersion.OPENSEARCH_1_3)
                 .capacity(CapacityConfig.builder()
                         .masterNodes(0)
                         .dataNodes(1)
