@@ -38,57 +38,11 @@
 
     <dependencies>
         <!-- AWS Cloud Development Kit -->
-<!--
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>core</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>ec2</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>opensearchservice</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>kinesisfirehose</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>events-targets</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>lambda-python</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>cognito</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
--->
-
         <dependency>
             <groupId>software.amazon.awscdk</groupId>
             <artifactId>aws-cdk-lib</artifactId>
             <version>2.85.0</version>
         </dependency>
-        <!-- dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>code-star-alpha</artifactId>
-            <version>2.0.0-alpha.1</version>
-        </dependency -->
-
         <dependency>
             <groupId>software.constructs</groupId>
             <artifactId>constructs</artifactId>
