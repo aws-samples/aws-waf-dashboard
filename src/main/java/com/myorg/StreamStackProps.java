@@ -1,6 +1,6 @@
 package com.myorg;
 
-import software.amazon.awscdk.core.NestedStackProps;
+import software.amazon.awscdk.NestedStackProps;
 import software.amazon.awscdk.services.opensearchservice.Domain;
 
 public class StreamStackProps implements NestedStackProps {
