@@ -1,14 +1,27 @@
 package com.myorg;
 
 
-import software.amazon.awscdk.core.*;
+
 import software.amazon.awscdk.services.cognito.*;
 import software.amazon.awscdk.services.ec2.EbsDeviceVolumeType;
 import software.amazon.awscdk.services.ec2.InstanceClass;
 import software.amazon.awscdk.services.ec2.InstanceSize;
 import software.amazon.awscdk.services.ec2.InstanceType;
+
 import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.opensearchservice.*;
+
+import software.constructs.Construct;
+import software.amazon.awscdk.Stack;
+import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.CfnParameter;
+import software.amazon.awscdk.RemovalPolicy;
+import software.amazon.awscdk.CfnOutput;
+import software.amazon.awscdk.Arn;
+import software.amazon.awscdk.ArnComponents;
+import software.amazon.awscdk.Duration;
+
+
 
 import java.util.Collections;
 import java.util.Map;

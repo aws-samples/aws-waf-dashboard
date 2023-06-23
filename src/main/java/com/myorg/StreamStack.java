@@ -1,10 +1,10 @@
 package com.myorg;
 
 
-import software.amazon.awscdk.core.CfnOutput;
-import software.amazon.awscdk.core.Construct;
-import software.amazon.awscdk.core.NestedStack;
-import software.amazon.awscdk.core.RemovalPolicy;
+import software.amazon.awscdk.CfnOutput;
+import software.constructs.Construct;
+import software.amazon.awscdk.NestedStack;
+import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.kinesisfirehose.CfnDeliveryStream;
 import software.amazon.awscdk.services.logs.LogGroup;

@@ -1,9 +1,5 @@
 package com.myorg;
 
-import software.amazon.awscdk.core.CustomResource;
-import software.amazon.awscdk.core.Duration;
-import software.amazon.awscdk.core.NestedStack;
-import software.amazon.awscdk.core.RemovalPolicy;
 import software.amazon.awscdk.services.events.EventPattern;
 import software.amazon.awscdk.services.events.Rule;
 import software.amazon.awscdk.services.events.targets.LambdaFunction;
@@ -11,12 +7,17 @@ import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.logs.RetentionDays;
-import software.amazon.awscdk.services.s3.Bucket;
 import software.constructs.Construct;
+import software.amazon.awscdk.NestedStack;
+
+import software.amazon.awscdk.CustomResource;
+import software.amazon.awscdk.RemovalPolicy;
+import software.amazon.awscdk.Duration;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 
 public class AppStack extends NestedStack {
     public Function dashboardsCustomizerLambda;
@@ -80,6 +81,7 @@ public class AppStack extends NestedStack {
     }
 
     private List<Rule> createEvents(Function targetLambdaFn) {
+        
         Rule newACLForWafV2 = Rule.Builder.create(this, "osdfwCaptureNewAclsWafv2")
                 .description("AWS WAF Dashboards Solution - detects new WebACLs and rules for WAFv2.")
                 .eventPattern(EventPattern.builder()
