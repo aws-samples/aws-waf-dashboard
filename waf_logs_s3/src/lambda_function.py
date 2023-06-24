@@ -11,71 +11,31 @@ s3 = boto3.client('s3')
 firehose = boto3.client('firehose')
 firehose_stream_name = os.environ.get('FIREHOSE_STREAM_NAME')
 
-def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAttempts):
-    failedRecords = []
+
+def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttempts):
+    failedRecord = []
     codes = []
     errMsg = ''
-    # if put_records throws for whatever reason, response['xx'] will error out, adding a check for a valid
-    # response will prevent this
-    response = None
-    try:
-        response = client.put_record_batch(
-        DeliveryStreamName=streamName,
-        Records=[
-            {
-                'Data': records
-            }
-        ])
-        print(response)
-    except Exception as e:
-        print(response)
-        failedRecords = records
-        errMsg = str(e)
-
-
-    # if there are no failedRecords (put_record_batch succeeded), iterate over the response to gather results
-    if not failedRecords and response and response['FailedPutCount'] > 0:
-        for idx, res in enumerate(response['Records']):
-            # (if the result does not have a key 'ErrorCode' OR if it does and is empty) => we do not need to re-ingest
-            if not res.get('ErrorCode'):
-                continue
-
-            codes.append(res['ErrorCode'])
-            failedRecords.append(records[idx])
-
-        errMsg = 'Individual error codes: ' + ','.join(codes)
-
-    if failedRecords:
-        if attemptsMade + 1 < maxAttempts:
-            print('Some records failed while calling PutRecords to Kinesis stream, retrying. %s' % (errMsg))
-            putRecordsToKinesisStream(streamName, failedRecords, client, attemptsMade + 1, maxAttempts)
-        else:
-            raise RuntimeError('Could not put records after %s attempts. %s' % (str(maxAttempts), errMsg))
-
-def putRecordToKinesisStream(streamName, records, client, attemptsMade, maxAttempts):
-    failedRecords = []
-    codes = []
-    errMsg = ''
-    # if put_records throws for whatever reason, response['xx'] will error out, adding a check for a valid
+    # if put_record throws for whatever reason, response['xx'] will error out, adding a check for a valid
     # response will prevent this
     response = None
     try:
         response = client.put_record(
         DeliveryStreamName=streamName,
         Record={
-                'Data': records
+                'Data': record
             })
     except Exception as e:
         print(response)
-        failedRecords = records
+        failedRecord = record
         errMsg = str(e)
 
-    if failedRecords:
+    if failedRecord:
         if attemptsMade + 1 < maxAttempts:
-            print('Some records failed while calling PutRecords to Kinesis stream, retrying. %s' % (errMsg))
-            putRecordsToKinesisStream(streamName, failedRecords, client, attemptsMade + 1, maxAttempts)
+            print('Some record failed while calling PutRecord to Kinesis stream, retrying. %s' % (errMsg))
+            putRecordToKinesisStream(streamName, failedRecord, client, attemptsMade + 1, maxAttempts)
         else:
-            raise RuntimeError('Could not put records after %s attempts. %s' % (str(maxAttempts), errMsg))
+            raise RuntimeError('Could not put record after %s attempts. %s' % (str(maxAttempts), errMsg))
 
 def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
