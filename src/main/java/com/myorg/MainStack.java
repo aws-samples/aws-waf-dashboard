@@ -309,7 +309,7 @@ public class MainStack extends Stack {
                 .logRetention(RetentionDays.ONE_MONTH)
                 .role(s3SinkLambdaRole) 
                 .code(lambdaCodeLocation)
-                .runtime(Runtime.PYTHON_3_9)
+                .runtime(Runtime.PYTHON_3_8)
                 .memorySize(128)
                 .timeout(Duration.seconds(160))
                 .environment(Map.of(
@@ -317,6 +317,7 @@ public class MainStack extends Stack {
                         "REGION", this.getRegion(),
                         "ACCOUNT_ID", this.getAccount()
                 ))
+                .retryAttempts(0)
                 .build();
 
         this.sinkBucket.addEventNotification(EventType.OBJECT_CREATED, 
