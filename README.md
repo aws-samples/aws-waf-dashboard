@@ -7,6 +7,7 @@ AWS WAF Dashboards are ready to use dashboards (build on Amazon OpenSearch Servi
 To start using  AWS WAF Dashboards you don't need to have any prior experience with Amazon OpenSearch or even AWS WAF, minimal AWS knowledge is require. You just need to run AWS CDK commands - which will do all the rest. The whole process takes around 30 minutes (with 25 minutes of waiting).
 
 *Note:* You will need to launch the AWS CDK project in the us-east-1 AWS Region if you are using an AWS WAF web ACL that is associated to an Amazon CloudFront distribution. Otherwise, you have the option to launch the AWS CDK project in any AWS Region that supports the AWS services to be deployed.
+Alternatively if you have enabled WAF logging into S3 you can copy those logs (suffix: .log.gz) into dedicated S3 bucket and tey will be also ingested.
 
 ## Installation
 
@@ -77,6 +78,13 @@ To connect to AWS WAF logs
 2.	If you haven’t enabled AWS WAF logs yet, you need to do so now in order to continue. To do this, choose the Logging and metrics tab in your web ACL, and then choose Enable.
 3.	For Amazon Kinesis Data Firehose delivery stream, select the Kinesis Firehose that was created by the template in Step 1. Its name starts with aws-waf-logs. 
 4.	Save your changes.
+
+#### Copy WAF logs 
+Copy WAF logs that youre interestd in from S3 from loacation configured in web ACL into bucket displayed in output of cdk deployment, ex:
+
+```
+OSDfW.osdfwS3SinkBucketName = osdfw-osdfws3sinkbucket26ae0e20-1uutfdionqwmf
+```
 
 #### Final result
 That's all! Now, your WAF logs will be send from WAF service throug Kinesis Firehose directly to the OpenSearch cluster and will become available to you using OpenSearch dashboards. After a couple of minutes, you should start seeing that your dashboards have got data on it.
