@@ -5,7 +5,6 @@ import gzip
 import os
 import math
 
-print('Loading function')
 
 s3 = boto3.client('s3')
 firehose = boto3.client('firehose')
@@ -16,8 +15,7 @@ def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttemp
     failedRecord = []
     codes = []
     errMsg = ''
-    # if put_record throws for whatever reason, response['xx'] will error out, adding a check for a valid
-    # response will prevent this
+
     response = None
     try:
         response = client.put_record(
@@ -48,8 +46,7 @@ def lambda_handler(event, context):
             lines =  fh.readlines()
             for l in lines:
                 putRecordToKinesisStream(firehose_stream_name, l.strip(), firehose, 1, 2) 
-            #putRecordsToKinesisStream(firehose_stream_name, ''.join(lines).strip(), firehose, 1, 2)
-
+ 
     except Exception as e:
         print(e)
         raise e
