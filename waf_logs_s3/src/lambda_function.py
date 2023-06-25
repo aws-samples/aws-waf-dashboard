@@ -43,9 +43,8 @@ def lambda_handler(event, context):
         content = response['Body'].read()
         fobj=io.BytesIO(content)
         with gzip.open(fobj, mode='rt') as fh:
-            lines =  fh.readlines()
-            for l in lines:
-                putRecordToKinesisStream(firehose_stream_name, l.strip(), firehose, 1, 2) 
+            for l in fh:
+                putRecordToKinesisStream(firehose_stream_name, l.strip(), firehose, 1, 1) 
  
     except Exception as e:
         print(e)
