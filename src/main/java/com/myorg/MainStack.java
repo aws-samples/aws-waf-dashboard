@@ -28,6 +28,8 @@ import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.s3.EventType;
+import software.amazon.awscdk.services.s3.assets.AssetOptions;
+import software.amazon.awscdk.BundlingOptions;
 
 
 import java.util.Collections;
@@ -42,6 +44,7 @@ public class MainStack extends Stack {
     private CfnParameter userEmail;
     private CfnParameter cognitoDomainName;
     private CfnParameter sinkBucketName;
+    private String bundleLambda;
 
     private UserPool userPool;
     private CfnIdentityPool identityPool;
@@ -66,7 +69,7 @@ public class MainStack extends Stack {
 
         StreamStackProps streamStackProps = new StreamStackProps(this.openSearchDomain);
         this.streamStack = new StreamStack(this, "Stream", streamStackProps);
-        new AppStack(this, "App", streamStackProps);
+        new AppStack(this, "App", streamStackProps, this.bundleLambda);
 
         this.createS3Sink();
 
@@ -115,6 +118,8 @@ public class MainStack extends Stack {
                 .defaultValue("osdfw-sink-bucket")
                 .description("Sink bucket name")
                 .build();
+
+        this.bundleLambda = (String)this.getNode().tryGetContext("bundleLambda");
 
 
     }
@@ -301,7 +306,43 @@ public class MainStack extends Stack {
                         .resources(Collections.singletonList(this.sinkBucket.getBucketArn() + "/*"))
                         .build());
         
-        Code lambdaCodeLocation = Code.fromAsset("waf_logs_s3/src");                
+        Code lambdaCodeLocation = null;  
+
+
+        if (this.bundleLambda.equalsIgnoreCase("true")){
+
+
+                List<String> bundleCommand = List.of("bash", "-c", 
+                        "DIR=$(pwd) && "                        
+                        +"mkdir /asset-output/python && "
+                        + "pip install -r requirements.txt -t /asset-output/python  && "
+                        + "cd /asset-output/python && "
+                        + "find . -type f "
+                        + "-not -path '*.pyc' "
+                        + "-exec cp --parents {} .. \\; && "
+                        + "cd ${DIR} && "
+                        + "rm -fr /asset-output/python &&"
+                        + "find . -type f "
+                        + "-not -path './python_virtual_env/*' "
+                        + "-not -path '*.pyc' "
+                        + "-not -path '*.zip' "
+                        + "-not -path './.DS_Store' "
+                        + "-exec cp --parents {} /asset-output \\; && "
+                        + "cd /asset-output && "
+                        + "zip -r ${DIR}/waf_logs_s3.zip *");
+
+                BundlingOptions bundlingOptions = BundlingOptions.builder()
+                                        .image(Runtime.PYTHON_3_9.getBundlingImage())
+                                        .command(bundleCommand)
+                                        .build();
+
+                lambdaCodeLocation = Code.fromAsset("waf_logs_s3", 
+                        AssetOptions.builder().bundling(bundlingOptions).build());
+        } else {
+                lambdaCodeLocation = Code.fromAsset("waf_logs_s3/waf_logs_s3.zip");
+        }
+
+
         Function s3SinkLambda = Function.Builder.create(this, "osdfwS3SinkLambda")
                 .architecture(Architecture.ARM_64)
                 .description("AWS WAF Dashboards Solution function to process WAF logs from s3 and push to the Firehose")

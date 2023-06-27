@@ -1,3 +1,4 @@
 cdk.out
 .vscode
 target
+.DS_Store

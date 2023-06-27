@@ -22,19 +22,51 @@ import java.util.Map;
 public class AppStack extends NestedStack {
     public Function dashboardsCustomizerLambda;
 
-    public AppStack(Construct scope, String id, StreamStackProps props) {
+    public AppStack(Construct scope, String id, StreamStackProps props, String bundleLambda) {
         super(scope, id, props);
 
-        Code lambdaCodeLocation = Code.fromAsset("assets/os-customizer-lambda.zip");
-        //Code lambdaCodeLocation = Code.fromBucket(Bucket.fromBucketArn(this, "id", "arn:aws:s3:::aws-waf-dashboard-resources"), "os-customizer-lambda.zip");
-        //Code lambdaCodeLocation = Code.fromBucket(Bucket.fromBucketArn(this, "id", "arn:aws:s3:::waf-dashboards-" + this.getRegion()), "os-customizer-lambda.zip");
+        Code lambdaCodeLocation = null;  
+
+
+        if (bundleLambda.equalsIgnoreCase("true")){
+
+                List<String> bundleCommand = List.of("bash", "-c", 
+                        "DIR=$(pwd) && "                        
+                        +"mkdir /asset-output/python && "
+                        + "pip install -r requirements.txt -t /asset-output/python  && "
+                        + "cd /asset-output/python && "
+                        + "find . -type f "
+                        + "-not -path '*.pyc' "
+                        + "-exec cp --parents {} .. \\; && "
+                        + "cd ${DIR} && "
+                        + "rm -fr /asset-output/python &&"
+                        + "find . -type f "
+                        + "-not -path './python_virtual_env/*' "
+                        + "-not -path '*.pyc' "
+                        + "-not -path '*.zip' "
+                        + "-not -path './.DS_Store' "
+                        + "-exec cp --parents {} /asset-output \\; && "
+                        + "cd /asset-output && "
+                        + "zip -r ${DIR}/os-customizer-lambda.zip *");
+                
+                BundlingOptions bundlingOptions = BundlingOptions.builder()
+                                .image(Runtime.PYTHON_3_9.getBundlingImage())
+                                .command(bundleCommand)
+                                .build();
+                lambdaCodeLocation = Code.fromAsset("assets", 
+                        AssetOptions.builder().bundling(bundlingOptions).build());
+        } else {
+                lambdaCodeLocation = Code.fromAsset("assets/os-customizer-lambda.zip");
+        }
+ 
+        
 
         Role customizerRole = createLambdaRole();
 
         this.dashboardsCustomizerLambda = Function.Builder.create(this, "osdfwDashboardsSeeder")
                 .architecture(Architecture.ARM_64)
                 .description("AWS WAF Dashboards Solution main function")
-                .handler("lambda_function.handler")
+                .handler("src/lambda_function.handler")
                 .logRetention(RetentionDays.ONE_MONTH)
                 .role(customizerRole) //todo
                 .code(lambdaCodeLocation)
@@ -53,7 +85,7 @@ public class AppStack extends NestedStack {
         Function customizerUpdaterLambda = Function.Builder.create(this, "osdfwDashboardsUpdater")
                 .architecture(Architecture.ARM_64)
                 .description("AWS WAF Dashboards Solution updater function")
-                .handler("lambda_function.update")
+                .handler("src/lambda_function.update")
                 .logRetention(RetentionDays.ONE_MONTH)
                 .role(customizerRole) //todo
                 .code(lambdaCodeLocation)

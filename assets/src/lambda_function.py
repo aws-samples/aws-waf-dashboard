@@ -10,9 +10,9 @@ from crhelper import CfnResource
 from furl import furl
 from opensearchpy import OpenSearch, RequestsHttpConnection
 
-from helpers.placeholder_resolver import resolve_placeholders
-from helpers.service_settings import ServiceSettings
-from helpers.solution_components import SolutionComponents
+from src.helpers.placeholder_resolver import resolve_placeholders
+from src.helpers.service_settings import ServiceSettings
+from src.helpers.solution_components import SolutionComponents
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)

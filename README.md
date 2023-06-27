@@ -86,6 +86,16 @@ Copy WAF logs that youre interestd in from S3 from loacation configured in web A
 OSDfW.osdfwS3SinkBucketName = osdfw-osdfws3sinkbucket26ae0e20-1uutfdionqwmf
 ```
 
+#### Bundle Lambda into zip packages
+To build new version of Lambdas zip archives that will be utilized in deployment local Docker system is requried. 
+By addding `-c bundleLambda=true` to `cdk deploy` dedicated logic will be activated that will pull requred docker image and will bundle new versions of Lambda archives.
+
+```
+cdk deploy -c bundleLambda=true
+```
+
+
+
 #### Final result
 That's all! Now, your WAF logs will be send from WAF service throug Kinesis Firehose directly to the OpenSearch cluster and will become available to you using OpenSearch dashboards. After a couple of minutes, you should start seeing that your dashboards have got data on it.
 
