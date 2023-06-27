@@ -59,6 +59,7 @@ def sendEventToEventBus():
         print(e)
         raise e
 
+
 def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttempts):
     failedRecord = []
     codes = []
@@ -84,6 +85,9 @@ def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttemp
             raise RuntimeError('Could not put record after %s attempts. %s' % (str(maxAttempts), errMsg))
 
 def lambda_handler(event, context):
+    update_dashboards = False
+    webaclIdSet = getExistingWebACLIDsFromOpenSearch()
+
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
     try:
@@ -92,7 +96,13 @@ def lambda_handler(event, context):
         fobj=io.BytesIO(content)
         with gzip.open(fobj, mode='rt') as fh:
             for l in fh:
+                l_json = json.loads(l)
+                if l_json['webaclId'] not in webaclIdSet:
+                    update_dashboards = True
                 putRecordToKinesisStream(firehose_stream_name, l.strip(), firehose, 1, 1) 
+        
+        if update_dashboards == True:
+            sendEventToEventBus()
  
     except Exception as e:
         print(e)
