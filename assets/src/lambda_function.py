@@ -139,9 +139,11 @@ def call_dashboards_api_for_resource(method, resource_type, resource_name, resou
     response = requests.request(method, f.url, auth=service_settings.aws_auth, headers=service_settings.headers, data=resource_body)
 
     if response.ok:
-        logging.info("Request was successful")
+        logging.info("Request was successful: %s", response.text)
     elif response.status_code == 404:
         logging.info("Request made but the resource was not found")
+    elif response.status_code == 409:
+        logging.error("Request made but the resource already exists: %s", response.text)
     else:
         raise Exception(response.text)
 
