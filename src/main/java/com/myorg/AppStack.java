@@ -7,9 +7,10 @@ import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.logs.RetentionDays;
+import software.amazon.awscdk.services.s3.assets.AssetOptions;
 import software.constructs.Construct;
 import software.amazon.awscdk.NestedStack;
-
+import software.amazon.awscdk.BundlingOptions;
 import software.amazon.awscdk.CustomResource;
 import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Duration;
@@ -127,6 +128,20 @@ public class AppStack extends NestedStack {
                 .targets(List.of(LambdaFunction.Builder.create(targetLambdaFn).build()))
                 .enabled(true)
                 .build();
+  
+         Rule newACLIDs3Sink = Rule.Builder.create(this, "osdfwCaptureNewAclsS3Sink")
+                .description("AWS WAF Dashboards Solution - detects new WebACL ID in logs.")
+                .eventPattern(EventPattern.builder()
+                        .source(List.of("sink.s3"))
+                        .detailType(List.of("S3 Sink"))
+                        .detail(Map.of(
+                                "eventSource", List.of("sink.lambda"),
+                                "eventName", List.of("CreateWebACL")
+                        ))
+                        .build())
+                .targets(List.of(LambdaFunction.Builder.create(targetLambdaFn).build()))
+                .enabled(true)
+                .build();               
 
         // todo add conditional parameter to disable waf v1 capabilities
         Rule newACLRulesForWafRegional = Rule.Builder.create(this, "osdfwCaptureNewAclsWafv1Regional")
@@ -157,7 +172,7 @@ public class AppStack extends NestedStack {
                 .enabled(true)
                 .build();
 
-        return List.of(newACLRulesForWafRegional, newACLRulesForWafGlobal, newACLForWafV2);
+        return List.of(newACLRulesForWafRegional, newACLRulesForWafGlobal, newACLForWafV2, newACLIDs3Sink);
     }
 
     private Role createLambdaRole() {

@@ -142,7 +142,7 @@ public class MainStack extends Stack {
 
         this.openSearchDomain = Domain.Builder.create(this, "osdfwOpensearchDomain")
                 .domainName(openSearchDomainName.getValueAsString())
-                .version(EngineVersion.OPENSEARCH_1_3)
+                .version(EngineVersion.OPENSEARCH_1_0)
                 .capacity(CapacityConfig.builder()
                         .masterNodes(0)
                         .dataNodes(1)
@@ -247,6 +247,15 @@ public class MainStack extends Stack {
                 .resources(List.of(sinkBucket.getBucketArn() + "/*"))
                 .build();
 
+        PolicyStatement osPolicyStatement = PolicyStatement.Builder.create()
+                .effect(Effect.ALLOW)
+                .actions(List.of(
+                        "es:ESHttp*"
+                ))
+                .resources(List.of(this.openSearchDomain.getDomainArn() + "/*"))
+                .build();
+
+
         PolicyStatement firehosePolicyStatement = PolicyStatement.Builder.create()
                 .effect(Effect.ALLOW)
                 .actions(List.of(
@@ -270,11 +279,19 @@ public class MainStack extends Stack {
                 "logs:PutLogEvents"
                 ))
                 .resources(List.of("arn:aws:logs:" + this.getRegion() + ":" + this.getAccount() + ":log-group:/aws/lambda/*:*"))
-                .build();       
+                .build();   
+                
+           
+        PolicyStatement eventBusLambdaPolicyStatement = PolicyStatement.Builder.create()
+                        .effect(Effect.ALLOW)
+                        .actions(Collections.singletonList("events:PutEvents"))
+                        .resources(Collections.singletonList("arn:aws:events:" + this.getRegion() + ":" + this.getAccount()  +":event-bus/default"))
+                        .build();
 
 
         ManagedPolicy policy = ManagedPolicy.Builder.create(this, "osdfwS3SinkLambdaPolicy")
-                .statements(List.of(s3PolicyStatement, firehosePolicyStatement, cwLGPolicyStatement, cwSPolicyStatement))
+                .statements(List.of(s3PolicyStatement, firehosePolicyStatement, cwLGPolicyStatement, cwSPolicyStatement, 
+                        osPolicyStatement,eventBusLambdaPolicyStatement))
                 .build();
 
         return Role.Builder.create(this, "osdfwS3SinkLambdaRole")
@@ -305,6 +322,7 @@ public class MainStack extends Stack {
                         .principals(Collections.singletonList(new ArnPrincipal(s3SinkLambdaRole.getRoleArn())))
                         .resources(Collections.singletonList(this.sinkBucket.getBucketArn() + "/*"))
                         .build());
+                
         
         Code lambdaCodeLocation = null;  
 
@@ -346,17 +364,18 @@ public class MainStack extends Stack {
         Function s3SinkLambda = Function.Builder.create(this, "osdfwS3SinkLambda")
                 .architecture(Architecture.ARM_64)
                 .description("AWS WAF Dashboards Solution function to process WAF logs from s3 and push to the Firehose")
-                .handler("lambda_function.lambda_handler")
+                .handler("src/lambda_function.lambda_handler")
                 .logRetention(RetentionDays.ONE_MONTH)
                 .role(s3SinkLambdaRole) 
                 .code(lambdaCodeLocation)
-                .runtime(Runtime.PYTHON_3_8)
+                .runtime(Runtime.PYTHON_3_9)
                 .memorySize(128)
                 .timeout(Duration.seconds(160))
                 .environment(Map.of(
                         "FIREHOSE_STREAM_NAME", this.streamStack.getFirehoseStreamName(),
                         "REGION", this.getRegion(),
-                        "ACCOUNT_ID", this.getAccount()
+                        "ACCOUNT_ID", this.getAccount(),
+                        "OS_ENDPOINT", this.openSearchDomain.getDomainEndpoint()
                 ))
                 .retryAttempts(0)
                 .build();
