@@ -2,3 +2,4 @@ cdk.out
 .vscode
 target
 .DS_Store
+*/python_virtual_env/
