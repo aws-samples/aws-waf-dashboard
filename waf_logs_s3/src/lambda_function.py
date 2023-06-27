@@ -39,6 +39,25 @@ def getExistingWebACLIDsFromOpenSearch():
 
     return webaclIdSet
 
+def sendEventToEventBus():
+    event = {
+        "eventSource": ["sink.lambda"],
+        "eventName": ["CreateWebACL"]
+    }
+    try:
+        response = event_client.put_events(
+            Entries=[
+                {
+                    'Source': 'sink.s3',
+                    'DetailType': 'S3 Sink',
+                    'Detail': json.dumps(event),
+                    'EventBusName': 'default'  
+                },
+            ]
+        ) 
+    except Exception as e:
+        print(e)
+        raise e
 
 def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttempts):
     failedRecord = []
