@@ -4,11 +4,40 @@ import io
 import gzip
 import os
 import math
+import json
+from requests_aws4auth import AWS4Auth
+import requests
 
 
 s3 = boto3.client('s3')
 firehose = boto3.client('firehose')
+event_client = boto3.client('events')
 firehose_stream_name = os.environ.get('FIREHOSE_STREAM_NAME')
+region = os.environ.get('REGION')
+os_endpoint = os.environ.get('OS_ENDPOINT')
+update_dashboards = False
+
+def getExistingWebACLIDsFromOpenSearch():
+    host = os_endpoint
+    path = '/_cat/indices?format=json'
+    service = 'es'
+    credentials = boto3.Session().get_credentials()
+    awsauth = AWS4Auth(service=service, region=region, refreshable_credentials=credentials)
+    url = "https://" + host + path
+    r = requests.get(url, auth=awsauth)
+    indices_json_details = r.json()
+    indices_json = [i["index"].strip() for i in indices_json_details if i["index"].startswith('awswaf-') and i["status"] == "open"]
+    webaclIdSet = set()
+    payload = json.loads('{ "query": { "match_all": {}}, "collapse": { "field": "webaclId.keyword"},"_source": false}')
+    for i  in indices_json:
+        path = '/' + i.strip() +"/_search"
+        url = "https://" + host.strip() + path.strip()
+        r = requests.post(url, auth=awsauth, json=payload)
+        r_json = r.json()
+        for hit in r_json['hits']['hits']:
+            webaclIdSet.update(hit['fields']['webaclId.keyword'])
+
+    return webaclIdSet
 
 
 def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttempts):
