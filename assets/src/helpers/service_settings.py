@@ -27,11 +27,9 @@ class ServiceSettings:
             "Content-Type": "application/json",
             'osd-xsrf': 'true'}
         self.aws_auth = AWS4Auth(
-            self.credentials.access_key,
-            self.credentials.secret_key,
-            self.region,
-            self.service,
-            session_token=self.credentials.token)
+            region=self.region,
+            service=self.service,
+            refreshable_credentials=self.credentials)
         self.dashboards_api_resource_types = {
             "dashboards": "dashboard",
             "templates": "template",
@@ -48,8 +46,6 @@ class ServiceSettings:
             logging.info("Event not triggered through Custom Resource - ResourceProperties not available. Defaulting to Env Vars")
 
         self.aws_auth = AWS4Auth(
-            self.credentials.access_key,
-            self.credentials.secret_key,
-            self.region,
-            self.service,
-            session_token=self.credentials.token)
+            region=self.region,
+            service=self.service,
+            refreshable_credentials=self.credentials)
