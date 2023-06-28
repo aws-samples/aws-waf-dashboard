@@ -18,6 +18,10 @@ os_endpoint = os.environ.get('OS_ENDPOINT')
 update_dashboards = False
 
 def getExistingWebACLIDsFromOpenSearch():
+    """
+    This function gets the existing web acl ids from the open search indices.
+    
+    """
     host = os_endpoint
     path = '/_cat/indices?format=json'
     service = 'es'
@@ -40,6 +44,10 @@ def getExistingWebACLIDsFromOpenSearch():
     return webaclIdSet
 
 def sendEventToEventBus():
+    """
+    This function sends an event to the event bus.
+    
+    """
     event = {
         "eventSource": ["sink.lambda"],
         "eventName": ["CreateWebACL"]
@@ -61,6 +69,15 @@ def sendEventToEventBus():
 
 
 def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttempts):
+    """
+    This function puts a record to a Kinesis Data Stream.
+
+    @param streamName: The Kinesis Data Stream name.
+    @param record: The record to put to the Kinesis Data Stream.
+    @param client: The Kinesis Data Stream client.
+    @param attemptsMade: The number of times PutRecord has been attempted.
+    @param maxAttempts: The maximum number of times to attempt PutRecord.
+    """
     failedRecord = []
     codes = []
     errMsg = ''
@@ -85,6 +102,10 @@ def putRecordToKinesisStream(streamName, record, client, attemptsMade, maxAttemp
             raise RuntimeError('Could not put record after %s attempts. %s' % (str(maxAttempts), errMsg))
 
 def lambda_handler(event, context):
+    """
+    This function gets the WAF ACL logs in .log.gz from the S3 bucket and pushes it to the Kinesis Data Stream.
+    
+    """
     update_dashboards = False
     webaclIdSet = getExistingWebACLIDsFromOpenSearch()
 
