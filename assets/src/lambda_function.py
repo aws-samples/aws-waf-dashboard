@@ -9,6 +9,7 @@ import requests
 from crhelper import CfnResource
 from furl import furl
 from opensearchpy import OpenSearch, RequestsHttpConnection
+import re
 
 from src.helpers.placeholder_resolver import resolve_placeholders
 from src.helpers.service_settings import ServiceSettings
@@ -139,7 +140,12 @@ def call_dashboards_api_for_resource(method, resource_type, resource_name, resou
     response = requests.request(method, f.url, auth=service_settings.aws_auth, headers=service_settings.headers, data=resource_body)
 
     if response.ok:
-        logging.info("Request was successful: %s", response.text)
+        if re.search('^<!DOCTYPE html>', response.text, re.IGNORECASE):
+            logging.warning("HTML response detected")
+            if re.search('"cognitoSignInForm"', response.text):
+                logging.error("Cognito Sign In Form detected")
+        else:
+            logging.info("Request was successful: %s", response.text)
     elif response.status_code == 404:
         logging.info("Request made but the resource was not found")
     elif response.status_code == 409:
