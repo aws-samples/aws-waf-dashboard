@@ -44,6 +44,7 @@ public class MainStack extends Stack {
     private CfnParameter userEmail;
     private CfnParameter cognitoDomainName;
     private CfnParameter sinkBucketName;
+    private CfnParameter dataNodesCount;
     private String bundleLambda;
 
     private UserPool userPool;
@@ -93,6 +94,12 @@ public class MainStack extends Stack {
                 //.allowedPattern(".*.search")
                 .description("OpenSearch Node type")
                 .build();
+
+        this.dataNodesCount = CfnParameter.Builder.create(this, "osdfwOsdataNodesCount")
+                .type("Number")
+                .defaultValue("1")
+                .description("OpenSearch Data Nodes count")
+                .build();                
 
         this.openSearchDomainName = CfnParameter.Builder.create(this, "osdfwOsDomainName")
                 .type("String")
@@ -145,9 +152,9 @@ public class MainStack extends Stack {
                 .version(EngineVersion.OPENSEARCH_1_0)
                 .capacity(CapacityConfig.builder()
                         .masterNodes(0)
-                        .dataNodes(1)
+                        .dataNodes(this.dataNodesCount.getValueAsNumber())
                         .warmNodes(0)
-                        .dataNodeInstanceType("r6g.large.search") //todo bug? passing param doesn't work
+                        .dataNodeInstanceType(this.nodeType.getValueAsString())
                         .build())
                 .ebs(EbsOptions.builder()
                         .enabled(true)
