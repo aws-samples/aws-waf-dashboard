@@ -1,0 +1,7 @@
+*/python_virtual_env/*
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+cdk.out/*
+target/*
+.vscode
