@@ -30,6 +30,7 @@ public class MainStack extends Stack {
     private Domain openSearchDomain;
     private CfnParameter dataNodeEBSVolumeSize;
     private CfnParameter nodeType;
+    private CfnParameter dataNodesCount;
     private CfnParameter openSearchDomainName;
     private CfnParameter userEmail;
     private CfnParameter cognitoDomainName;
@@ -78,6 +79,13 @@ public class MainStack extends Stack {
                 .description("OpenSearch Node type")
                 .build();
 
+        this.dataNodesCount = CfnParameter.Builder.create(this, "osdfwOsDataNodesCount")
+                .type("Number")
+                .defaultValue("1")
+                .description("OpenSearch Data Nodes count")
+                .build();                
+
+
         this.openSearchDomainName = CfnParameter.Builder.create(this, "osdfwOsDomainName")
                 .type("String")
                 .defaultValue("osdfw-opensearch-domain")
@@ -119,7 +127,7 @@ public class MainStack extends Stack {
                 .version(EngineVersion.OPENSEARCH_1_0)
                 .capacity(CapacityConfig.builder()
                         .masterNodes(0)
-                        .dataNodes(1)
+                        .dataNodes(this.dataNodesCount.getValueAsNumber())
                         .warmNodes(0)
                         .dataNodeInstanceType("r6g.large.search") //todo bug? passing param doesn't work
                         .build())
