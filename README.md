@@ -55,6 +55,8 @@ There are three more optional AWS CDK deployment parameters that have default va
 
 •	**OpenSearchDomainName:** *osdfwOsDomainName*
 
+•   **Number of Data Nodes:** *osdfwOsDataNodesCount*
+
 #### Verify that the OpenSearch dashboard works
 To test the OpenSearch dashboard:
 1.	First, check the email address that you provided in the parameter for *osdfwDashboardsAdminEmail*. You should have received an email with the required password to log in to the OpenSearch dashboard. Make a note of it. 
