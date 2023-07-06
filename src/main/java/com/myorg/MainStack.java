@@ -73,8 +73,8 @@ public class MainStack extends Stack {
 
         this.nodeType = CfnParameter.Builder.create(this, "osdfwOsNodeSize")
                 .type("String")
-                .defaultValue(InstanceType.of(InstanceClass.MEMORY6_GRAVITON, InstanceSize.LARGE).toString())
-                //.allowedPattern(".*.search")
+                .defaultValue(InstanceType.of(InstanceClass.MEMORY6_GRAVITON, InstanceSize.LARGE).toString() + ".search")
+                .allowedPattern(".*.search")
                 .description("OpenSearch Node type")
                 .build();
 
@@ -121,7 +121,7 @@ public class MainStack extends Stack {
                         .masterNodes(0)
                         .dataNodes(1)
                         .warmNodes(0)
-                        .dataNodeInstanceType("r6g.large.search") //todo bug? passing param doesn't work
+                        .dataNodeInstanceType(this.nodeType.getValueAsString())
                         .build())
                 .ebs(EbsOptions.builder()
                         .enabled(true)
